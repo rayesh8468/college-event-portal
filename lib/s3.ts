@@ -6,19 +6,17 @@ import {
   DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { getRequiredAwsCredentials, getAwsRegion } from "./aws-credentials";
 
 // ── Client ───────────────────────────────────────────────────────────
 
-// Credentials are loaded from environment variables
-// Amplify sets AMAZON_ACCESS_KEY_ID, AMAZON_SECRET_ACCESS_KEY, AMAZON_REGION
-const accessKeyId = process.env.AMAZON_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID;
-const secretAccessKey = process.env.AMAZON_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY;
-
+const credentials = getRequiredAwsCredentials();
 const config: S3ClientConfig = {
-  region: process.env.AWS_REGION || process.env.AMAZON_REGION || "ap-south-1",
-  ...(accessKeyId && secretAccessKey
-    ? { credentials: { accessKeyId, secretAccessKey } }
-    : {}),
+  region: getAwsRegion(),
+  credentials: {
+    accessKeyId: credentials.accessKeyId,
+    secretAccessKey: credentials.secretAccessKey,
+  },
 };
 
 const s3Client = new S3Client(config);
