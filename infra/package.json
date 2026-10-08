@@ -1,0 +1,21 @@
+{
+  "name": "college-event-portal-infra",
+  "version": "1.0.0",
+  "bin": {
+    "app": "bin/app.js"
+  },
+  "scripts": {
+    "cdk": "cdk"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.150.0",
+    "constructs": "^10.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "aws-cdk": "^2.150.0",
+    "ts-node": "^10.9.0",
+    "tsx": "^4.23.15",
+    "typescript": "^5.0.0"
+  }
+}

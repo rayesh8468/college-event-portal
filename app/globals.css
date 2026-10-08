@@ -1,0 +1,217 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.4%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 222.2 47.4% 95.9%;
+    --secondary-foreground: 222.2 47.4% 10.6%;
+    --muted: 222.2 47.4% 95.9%;
+    --muted-foreground: 222.2 47.4% 10.6%;
+    --accent: 222.2 47.4% 95.9%;
+    --accent-foreground: 222.2 47.4% 10.6%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 222.2 47.4% 95.9%;
+    --input: 222.2 47.4% 95.9%;
+    --ring: 222.2 84% 60%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 6.3%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 6.3%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.4%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 217.2 32.6% 50%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Smooth scroll for all pages */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground));
+}
+
+/* Selection styling */
+::selection {
+  background-color: hsl(var(--primary) / 0.3);
+  color: hsl(var(--foreground));
+}
+
+/* Focus styles */
+*:focus-visible {
+  @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease-out forwards;
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 2s ease-in-out infinite;
+}
+
+/* Staggered animation delays */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.1s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.2s; }
+.stagger-5 { animation-delay: 0.25s; }
+.stagger-6 { animation-delay: 0.3s; }
+
+/* Card hover effect */
+.card-hover {
+  @apply transition-all duration-200;
+}
+.card-hover:hover {
+  @apply shadow-md -translate-y-0.5;
+}
+
+/* Gradient text utility */
+.gradient-text {
+  @apply bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent;
+}
+
+/* Skeleton loading */
+.skeleton {
+  @apply animate-pulse bg-muted rounded;
+}
+
+/* Table styles */
+.data-table {
+  @apply w-full text-sm text-left;
+}
+.data-table th {
+  @apply px-4 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b border-border bg-muted/50;
+}
+.data-table td {
+  @apply px-4 py-3 border-b border-border;
+}
+.data-table tr:last-child td {
+  @apply border-b-0;
+}
+.data-table tr:hover td {
+  @apply bg-muted/30;
+}
+
+/* Badge variants */
+.badge {
+  @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+}
+
+.badge-success {
+  @apply bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400;
+}
+.badge-warning {
+  @apply bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400;
+}
+.badge-danger {
+  @apply bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400;
+}
+.badge-info {
+  @apply bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400;
+}
+.badge-neutral {
+  @apply bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400;
+}
+
+/* Role badges */
+.role-badge {
+  @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium;
+}
+.role-badge.student {
+  @apply bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400;
+}
+.role-badge.hod {
+  @apply bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400;
+}
+.role-badge.admin {
+  @apply bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400;
+}
+
+/* Category badges */
+.category-badge {
+  @apply inline-flex items-center rounded px-2 py-0.5 text-xs font-medium;
+}
+.category-badge.technical {
+  @apply bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400;
+}
+.category-badge.cultural {
+  @apply bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400;
+}
+.category-badge.sports {
+  @apply bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400;
+}
+.category-badge.social {
+  @apply bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400;
+}
+.category-badge.academic {
+  @apply bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400;
+}
