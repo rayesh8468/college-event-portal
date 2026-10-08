@@ -15,6 +15,7 @@ interface Registration {
   status: string;
   registeredAt: string;
   paymentStatus?: string;
+  paymentId?: string;
   amountPaid?: number;
   event?: {
     eventId: string;
@@ -67,6 +68,12 @@ export default function MyRegistrationsPage() {
   const pending = registrations.filter((r) => r.status === "pending");
   const cancelled = registrations.filter((r) => r.status === "cancelled" || r.status === "rejected");
   const waitlisted = registrations.filter((r) => r.status === "waitlisted");
+
+  // Determine pending section label based on whether any pending registration requires payment
+  const pendingRequiringPayment = pending.filter(
+    (r) => r.event && typeof r.event.registrationFee === "number" && r.event.registrationFee > 0
+  );
+  const pendingLabel = pendingRequiringPayment.length > 0 ? "Pending Payment" : "Pending Confirmation";
 
   return (
     <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-8">
@@ -164,7 +171,7 @@ export default function MyRegistrationsPage() {
             <section className="space-y-3">
               <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
                 <Clock className="h-5 w-5 text-yellow-500" />
-                Pending Payment
+                {pendingLabel}
                 <span className="text-sm font-normal text-muted-foreground">({pending.length})</span>
               </h2>
               <div className="space-y-3">
@@ -216,10 +223,10 @@ export default function MyRegistrationsPage() {
                               <Clock className="h-3.5 w-3.5" />
                               Awaiting payment confirmation
                             </div>
-                            <Link href={`/register/${event.eventId}`}>
+                            <Link href={`/events/${event.eventId}/pay${reg.paymentId ? `?paymentId=${reg.paymentId}` : ''}`}>
                               <Button size="sm" className="flex items-center gap-1.5">
                                 <CreditCard className="h-3.5 w-3.5" />
-                                Complete Registration
+                                Complete Payment
                                 <ArrowRight className="h-3.5 w-3.5" />
                               </Button>
                             </Link>

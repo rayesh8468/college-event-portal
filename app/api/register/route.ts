@@ -59,26 +59,10 @@ export async function POST(request: NextRequest) {
     const registrationId = generateId("REG", 6);
     const now = new Date().toISOString();
 
-    const registration: Record<string, unknown> = {
-      registrationId,
-      eventId,
-      userId: user.userId,
-      status: "pending",
-      registeredAt: now,
-      paymentStatus: event.registrationFee > 0 ? "pending" : "paid",
-      amountPaid: event.registrationFee > 0 ? 0 : 0,
-    };
-
-    await docClient.send(
-      new PutCommand({
-        TableName: tables.registrations,
-        Item: registration,
-      })
-    );
-
-    // Create payment record if event has a fee
+    // Create payment record first if event has a fee (so we can include paymentId in registration)
+    let paymentId: string | null = null;
     if (event.registrationFee > 0) {
-      const paymentId = generateId("PAY", 6);
+      paymentId = generateId("PAY", 6);
       const payment: Record<string, unknown> = {
         paymentId,
         registrationId,
@@ -96,8 +80,25 @@ export async function POST(request: NextRequest) {
           Item: payment,
         })
       );
-      registration["paymentId"] = paymentId;
     }
+
+    const registration: Record<string, unknown> = {
+      registrationId,
+      eventId,
+      userId: user.userId,
+      status: "pending",
+      registeredAt: now,
+      paymentStatus: event.registrationFee > 0 ? "pending" : "paid",
+      amountPaid: 0,
+      ...(paymentId ? { paymentId } : {}),
+    };
+
+    await docClient.send(
+      new PutCommand({
+        TableName: tables.registrations,
+        Item: registration,
+      })
+    );
 
     // Auto-create OD request if event requires OD and is on a working day
     if (event.requiresOD && event.isWorkingDay) {
