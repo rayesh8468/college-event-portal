@@ -5,8 +5,7 @@
   "scripts": {
     "seed": "tsx scripts/seed-demo-data.ts",
     "dev": "npx next dev",
-    "prebuild": "bash -c 'mkdir -p ~/.aws && echo \"[default]\" > ~/.aws/credentials && echo \"aws_access_key_id=$AMAZON_ACCESS_KEY_ID\" >> ~/.aws/credentials && echo \"aws_secret_access_key=$AMAZON_SECRET_ACCESS_KEY\" >> ~/.aws/credentials && echo \"region=$AMAZON_REGION\" >> ~/.aws/credentials'",
-    "build": "npm run prebuild && next build",
+    "build": "next build",
     "start": "next start"
   },
   "dependencies": {
