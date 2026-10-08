@@ -1,0 +1,28 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - npm ci
+    build:
+      commands:
+        # Write AWS credentials to ~/.aws/credentials for runtime use
+        - mkdir -p ~/.aws
+        - echo "[default]" > ~/.aws/credentials
+        - echo "aws_access_key_id=$AMAZON_ACCESS_KEY_ID" >> ~/.aws/credentials
+        - echo "aws_secret_access_key=$AMAZON_SECRET_ACCESS_KEY" >> ~/.aws/credentials
+        - echo "region=$AMAZON_REGION" >> ~/.aws/credentials
+        # Also write to a runtime config file that the app can read
+        - mkdir -p .runtime-config
+        - echo "$AMAZON_ACCESS_KEY_ID" > .runtime-config/access_key
+        - echo "$AMAZON_SECRET_ACCESS_KEY" > .runtime-config/secret_key
+        - echo "$AMAZON_REGION" > .runtime-config/region
+        - npm run build
+  artifacts:
+    baseDirectory: .next
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - node_modules/**/*
+      - .next/cache/**/*
