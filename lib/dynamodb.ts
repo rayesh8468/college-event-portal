@@ -1,18 +1,3 @@
-/**
- * lib/dynamodb.ts
- *
- * AWS DynamoDB client (AWS SDK v3)
- *
- * Usage:
- *   import { docClient, tables } from "@/lib/dynamodb";
- *   await docClient.send(new QueryCommand({ TableName: tables.events, ... }));
- *
- * Environment variables (.env.local for local development):
- *   AWS_ACCESS_KEY_ID
- *   AWS_SECRET_ACCESS_KEY
- *   AWS_REGION (default: ap-south-1)
- */
-
 import {
   DynamoDBClient,
   DynamoDBClientConfig,
@@ -35,19 +20,14 @@ import {
 
 // ── Client setup ─────────────────────────────────────────────────────
 
-// Use environment variables for AWS credentials
-// In Amplify, credentials are provided via ~/.aws/credentials (written by prebuild script)
-// or via IAM role attached to the Amplify compute
+// Credentials are loaded from environment variables
+// Amplify sets AMAZON_ACCESS_KEY_ID, AMAZON_SECRET_ACCESS_KEY, AMAZON_REGION
 const config: DynamoDBClientConfig = {
-  region: process.env.AWS_REGION || "ap-south-1",
-  ...(process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY
-    ? {
-        credentials: {
-          accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-          secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-        },
-      }
-    : {}),
+  region: process.env.AWS_REGION || process.env.AMAZON_REGION || "ap-south-1",
+  credentials: {
+    accessKeyId: process.env.AMAZON_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID || "",
+    secretAccessKey: process.env.AMAZON_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY || "",
+  },
 };
 
 const client = new DynamoDBClient(config);
@@ -93,36 +73,50 @@ export async function get<T>(
   return (output.Item as T) ?? undefined;
 }
 
-/** Put a single item (create or overwrite) */
-export async function put<T extends Record<string, unknown>>(
+/** Put (create or overwrite) an item */
+export async function put(
   tableName: string,
-  item: T
+  item: Record<string, unknown>
 ): Promise<void> {
   await docClient.send(
     new PutCommand({ TableName: tableName, Item: item } as PutCommandInput)
   );
 }
 
-/** Update an item — only the provided keys are changed */
-export async function update<T extends Record<string, unknown>>(
+/** Update an item with a partial set of attributes */
+export async function update(
   tableName: string,
   key: Record<string, unknown>,
-  updates: Partial<T>,
-  conditionExpression?: string
+  updates: Record<string, unknown>,
+  expressionAttributeNames?: Record<string, string>
 ): Promise<void> {
+  const attrNames: Record<string, string> = expressionAttributeNames ?? {};
+  const attrValues: Record<string, unknown> = {};
+  const setClauses: string[] = [];
+
+  let i = 0;
+  for (const [field, value] of Object.entries(updates)) {
+    const nameKey = `#f${i}`;
+    const valKey = `:v${i}`;
+    attrNames[nameKey] = field;
+    attrValues[valKey] = value;
+    setClauses.push(`${nameKey} = ${valKey}`);
+    i++;
+  }
+
   await docClient.send(
     new UpdateCommand({
       TableName: tableName,
       Key: key,
-      ...Object.fromEntries(
-        Object.entries(updates).map(([k, v]) => [k, v])
-      ),
+      UpdateExpression: `SET ${setClauses.join(", ")}`,
+      ExpressionAttributeNames: attrNames,
+      ExpressionAttributeValues: attrValues,
     } as UpdateCommandInput)
   );
 }
 
 /** Delete an item by key */
-export async function remove(
+export async function del(
   tableName: string,
   key: Record<string, unknown>
 ): Promise<void> {
@@ -131,67 +125,44 @@ export async function remove(
   );
 }
 
-/** Query by partition key (and optional sort key condition) */
-export async function query<T>({
-  tableName,
-  KeyConditionExpression,
-  ExpressionAttributeNames,
-  ExpressionAttributeValues,
-  IndexName,
-  ScanIndexForward = false,
-  Limit,
-  ExclusiveStartKey,
-}: {
-  tableName: string;
-  KeyConditionExpression: string;
-  ExpressionAttributeNames?: Record<string, string>;
-  ExpressionAttributeValues?: Record<string, unknown>;
-  IndexName?: string;
-  ScanIndexForward?: boolean;
-  Limit?: number;
-  ExclusiveStartKey?: Record<string, unknown>;
-}): Promise<{ items: T[]; lastEvaluatedKey?: Record<string, unknown> }> {
-  const output = await docClient.send(
-    new QueryCommand({
-      TableName: tableName,
-      KeyConditionExpression,
-      ExpressionAttributeNames,
-      ExpressionAttributeValues,
-      IndexName,
-      ScanIndexForward,
-      Limit,
-      ExclusiveStartKey,
-    } as QueryCommandInput)
-  );
-
-  return {
-    items: (output.Items ?? []) as T[],
-    lastEvaluatedKey:
-      (output.LastEvaluatedKey as Record<string, unknown>) ?? undefined,
+/** Query items by partition key (and optional sort key condition) */
+export async function query<T>(
+  tableName: string,
+  keyConditionExpression: string,
+  expressionAttributeValues: Record<string, unknown>,
+  expressionAttributeNames?: Record<string, string>,
+  indexName?: string,
+  limit?: number,
+  scanIndexForward?: boolean
+): Promise<T[]> {
+  const params: QueryCommandInput = {
+    TableName: tableName,
+    KeyConditionExpression: keyConditionExpression,
+    ExpressionAttributeValues: expressionAttributeValues,
   };
+  if (expressionAttributeNames) params.ExpressionAttributeNames = expressionAttributeNames;
+  if (indexName) params.IndexName = indexName;
+  if (limit) params.Limit = limit;
+  if (scanIndexForward !== undefined) params.ScanIndexForward = scanIndexForward;
+
+  const output = await docClient.send(new QueryCommand(params));
+  return (output.Items ?? []) as T[];
 }
 
-/** Full table scan (use only for small tables or when no index covers the query) */
+/** Scan a table (optionally with a filter) */
 export async function scan<T>(
   tableName: string,
-  opts?: {
-    FilterExpression?: string;
-    ExpressionAttributeNames?: Record<string, string>;
-    ExpressionAttributeValues?: Record<string, unknown>;
-    Limit?: number;
-    ExclusiveStartKey?: Record<string, unknown>;
-  }
-): Promise<{ items: T[]; lastEvaluatedKey?: Record<string, unknown> }> {
-  const output = await docClient.send(
-    new ScanCommand({
-      TableName: tableName,
-      ...opts,
-    } as ScanCommandInput)
-  );
+  filterExpression?: string,
+  expressionAttributeValues?: Record<string, unknown>,
+  expressionAttributeNames?: Record<string, string>,
+  limit?: number
+): Promise<T[]> {
+  const params: ScanCommandInput = { TableName: tableName };
+  if (filterExpression) params.FilterExpression = filterExpression;
+  if (expressionAttributeValues) params.ExpressionAttributeValues = expressionAttributeValues;
+  if (expressionAttributeNames) params.ExpressionAttributeNames = expressionAttributeNames;
+  if (limit) params.Limit = limit;
 
-  return {
-    items: (output.Items ?? []) as T[],
-    lastEvaluatedKey:
-      (output.LastEvaluatedKey as Record<string, unknown>) ?? undefined,
-  };
+  const output = await docClient.send(new ScanCommand(params));
+  return (output.Items ?? []) as T[];
 }

@@ -91,11 +91,9 @@ export async function GET(request: NextRequest) {
     let events: any[];
     if (conditions.length === 0) {
       // Use ScanCommand when no filters (QueryCommand requires partition key)
-      const result = await scan<any>(tables.events, { Limit: limit });
-      events = result.items;
+      events = await scan<any>(tables.events, undefined, undefined, undefined, limit);
     } else {
-      const result = await queryAll<any>(queryParams);
-      events = result;
+      events = await queryAll<any>(queryParams);
     }
 
     if (search) {
