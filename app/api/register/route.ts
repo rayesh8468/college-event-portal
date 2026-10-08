@@ -83,6 +83,7 @@ export async function POST(request: NextRequest) {
         paymentId,
         registrationId,
         userId: user.userId,
+        eventId: eventId,
         amount: event.registrationFee,
         currency: "INR",
         status: "pending",

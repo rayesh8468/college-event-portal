@@ -116,8 +116,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: e.message }, { status: e.status });
     }
     console.error("POST /api/payment/verify error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
-      { error: "Payment verification failed" },
+      { error: "Payment verification failed", details: errorMessage },
       { status: 500 }
     );
   }
