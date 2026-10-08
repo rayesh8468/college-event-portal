@@ -2,12 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { parseBody } from "@/lib/api-helpers";
 import { CognitoIdentityProviderClient, AdminGetUserCommand } from "@aws-sdk/client-cognito-identity-provider";
 
+const registerAccessKeyId = process.env.AMAZON_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID;
+const registerSecretAccessKey = process.env.AMAZON_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY;
+
 const cognitoClient = new CognitoIdentityProviderClient({
   region: process.env.AWS_REGION || process.env.AMAZON_REGION || "ap-south-1",
-  credentials: {
-    accessKeyId: process.env.AMAZON_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID || "",
-    secretAccessKey: process.env.AMAZON_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY || "",
-  },
+  ...(registerAccessKeyId && registerSecretAccessKey
+    ? { credentials: { accessKeyId: registerAccessKeyId, secretAccessKey: registerSecretAccessKey } }
+    : {}),
 });
 
 const USER_POOL_ID = "ap-south-1_wwhNfufC3";
