@@ -1,7 +1,7 @@
 # VIT Event Portal — Demo Script
 
 **Live URL:** https://main.d10lvohwv4di32.amplifyapp.com
-**Duration:** 12–15 minutes + Q&A
+**Duration:** 13–15 minutes + Q&A
 **Audience:** Evaluators / faculty / peers
 
 ---
@@ -79,7 +79,24 @@ On the student tab, go to **Events**. Three events are live:
 
 ---
 
-## 5. Free Event Registration (4:30 – 5:30)
+## 5. Live Signup — THE NEW WOW MOMENT (5:30 – 7:00)
+
+**Open the Cognito console in a tab first:** User pool `CollegeEventPortalUsers` → Users tab. Refresh it so the audience sees the current 10 users.
+
+Then, live on the site:
+
+1. Click **Register** → fill in a **brand-new** college email (e.g. `yourname.21cse@vitapstudent.ac.in`) + password
+2. Submit → *"Registration successful. Please log in."*
+3. **Switch to the Cognito console → refresh the Users tab** → your new user is there, status **CONFIRMED**, in the **Students** group
+4. Log in with that account → you're in as a student
+
+> "Signup creates a real Cognito user — not a mock. The moment you register, you exist in the user pool, confirmed, with your role assigned. Let me show you… *refreshes* …there it is."
+
+This is the single best proof that the AWS integration is genuine. Have a spare email ready in case the audience wants to see it twice.
+
+---
+
+## 6. Free Event Registration (7:00 – 8:00)
 
 Register for **Python Basics Workshop** (free):
 1. Click **Register**
@@ -94,7 +111,7 @@ Register for **Python Basics Workshop** (free):
 
 ---
 
-## 6. Payment Flow — THE CENTREPIECE (5:30 – 9:00)
+## 7. Payment Flow — THE CENTREPIECE (8:00 – 10:30)
 
 **Have the DynamoDB console open in a third tab** (Tables → College_Payments → Explore items). This is your wow moment.
 
@@ -118,7 +135,7 @@ Register for **Python Basics Workshop** (free):
 
 ---
 
-## 7. My Registrations (9:00 – 10:00)
+## 8. My Registrations (10:30 – 11:00)
 
 Open **My Registrations**:
 
@@ -130,7 +147,7 @@ Open **My Registrations**:
 
 ---
 
-## 8. HOD Creates an Event (10:00 – 11:00)
+## 9. HOD Creates an Event (11:00 – 12:00)
 
 On the HOD tab, create an event **live**:
 
@@ -145,7 +162,7 @@ On the HOD tab, create an event **live**:
 
 ---
 
-## 9. Close (11:00 – 12:00)
+## 10. Close (12:00 – 13:00)
 
 > "To recap: role-based auth with Cognito, event management for HODs, a full registration and payment flow for students, and every record queryable in DynamoDB — all serverless on AWS, deployed automatically from GitHub."
 
@@ -170,9 +187,10 @@ Password for all: **`Vit@12345`**
 
 ## The Three Wow Moments (in priority order)
 
-1. **Live DynamoDB update** during payment — pending → paid while you watch
-2. **Role-based routing** — same login, two completely different apps
-3. **HOD creates an event** and it appears in the student's list with zero deployment
+1. **Live signup creating a real Cognito user** — register on the site, refresh Cognito, user is there, CONFIRMED, in the Students group
+2. **Live DynamoDB update** during payment — pending → paid while you watch
+3. **Role-based routing** — same login, two completely different apps
+4. **HOD creates an event** and it appears in the student's list with zero deployment
 
 ---
 
@@ -180,6 +198,7 @@ Password for all: **`Vit@12345`**
 
 - [ ] Open these tabs in advance: **site**, **login**, **events**, **DynamoDB console** (College_Payments + College_Registrations), **Amplify console** (build history)
 - [ ] Verify login works for all four demo accounts
+- [ ] Have a **spare unused college email** ready for the live signup (and a second one, in case you want to repeat it)
 - [ ] Confirm `aravind.21cse` has **no** registration for Web Development Bootcamp (so you can register live)
 - [ ] Check the site on the actual venue WiFi — or tether from your phone as backup
 - [ ] Have a **screenshot fallback** of the payment flow in case the network dies
